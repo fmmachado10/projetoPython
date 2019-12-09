@@ -33,6 +33,8 @@
                   <th>Nome</th>
                   <th>Quantidade</th>
                   <th>Valor</th>
+                  <th>ID</th>
+
               </tr>
           </thead>
           <tbody>
@@ -41,11 +43,12 @@
                               <td>{{ produto.nome }}</td>
                               <td>{{ produto.quantidade }}</td>
                               <td>{{ produto.valor }}</td>
+                              <td>{{ produto.id }}</td>
+                              
                           </tr>
           {% endfor %}
           </tbody>
       </table>
 
 
-      </form>
-{% endblock %}
+      </form>{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "template.html" %}
+{% block conteudo %}
+      <form action="{{ url_for('atualizar') }}" method="post">
+        <fieldset>
+          <div class="form-group">
+            <label for="nome">Nome</label>
+            <input type="text" id="nome" name="nome" class="form-control" value="{{ produto.nome }}">
+          </div>
+          <div class="form-group">
+            <label for="quantiade">Quantidade</label>
+            <input type="text" id="quantiade" name="quantiade" class="form-control" value="{{ produto.quantidade }}">
+          </div>
+          <div class="form-group">
+            <label for="valor">Valor</label>
+            <input type="text" id="valor" name="valor" class="form-control" value="{{ produto.valor }}">
+          </div>
+          <button type="submit" class="btn btn-primary btn-salvar">Salvar</button>
+        </fieldset>
+      </form>
+{% endblock %}
