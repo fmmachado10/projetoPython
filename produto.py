@@ -1,6 +1,5 @@
 from pymongo import MongoClient
-from flask import Flask, render_template, request
-
+from flask import Flask, render_template, request, redirect, flash, url_for
 
 client = MongoClient('mongodb+srv://fabricio:admin123@cluster0-iehjg.mongodb.net/test?retryWrites=true&w=majority')
 
@@ -37,7 +36,7 @@ def index():
         
         lista.append(p)            
     
-    return render_template('lista.html', titulo='produtos', produtos=lista)
+    return render_template('lista.html', titulo='Produtos', produtos=lista)
 
 @app.route('/novo')
 def novo():
@@ -51,7 +50,7 @@ def novo():
         
         lista.append(p)
 
-    return render_template('novo.html', titulo='Novo Produto', produtos=lista)
+    return render_template('novo.html', titulo='Cadastrar Produto', produtos=lista)
 
 
 @app.route('/criar', methods=['POST',])
@@ -59,9 +58,7 @@ def criar():
     nome = request. form['nome']
     quantidade = request. form['quantidade']
     valor = request. form['valor']
-    #produto = Produto(nome, quantidade, valor, str(id))
-    #lista.append(produto)
-
+    
     prod = {"nome": nome, "quantidade": quantidade, "valor": valor }
 
     collection.insert_one(prod)
@@ -75,49 +72,87 @@ def criar():
         
         lista.append(p)
 
-
-
-
-    return render_template('novo.html', titulo='Produto', produtos=lista)
+    return render_template('novo.html', titulo='Cadastrar Produto', produtos=lista)
 
 #------------------------EDITAR-----------------------------------
 @app.route('/editar/<id>')
 def editar(id):
 
-    print("ID para ser atualizado: " + id)
+    #produto: Produto = collection.find_one(id)
+
+    #gambiarra, pois não consegui buscar por id
+    documents = collection.find()
     
-    p = collection.find_one({"_id":id})
+    for document in documents:
+        p = Produto(str(document['nome']), str(document['quantidade']), str(document['valor']), str(document['_id']))
+        if p.id == str(id):
+            produto = p
+            break
 
-    produto = Produto(str(p['nome']), str(p['quantidade']), str(p['valor']), str(p['_id']))
-
-
-    return render_template('editar.html', titulo='Editando Produto', produto=produto )
+    return render_template('editar.html', titulo='Editar Produto', produto=produto )
 
 
 @app.route('/atualizar', methods=['POST',])
-def atualizar():
-  pass
-#---------------------------------------------
+def atualizar():  
+    print('AKIIIIII...........................................00')
+    nome = request.form['nome']
+    quantidade = request.form['quantidade']
+    valor = request.form['valor']
+    print('AKIIIIII...........................................01')
+    p = Produto(nome, quantidade, valor, id=request.form['id'])
 
-@app.route('/deletar')
+    print('AKIIIIII...........................................02')
+
+    collection.update_one({ "_id": p.id}, {"name": p.nome}, {"quantidade": p.quantidade}, {"valor":p.valor})
+
+    pass
+
+    return redirect(url_for('index'))
+
+#---------------------------------------------
+@app.route('/deletar/<id>')
 def deletar(id):
 
-    print('aki01...')
+    documents = collection.find()
+    print('aki..........................................................00')
 
-    collection.delete_one(id)
+    for document in documents:
+        p = Produto(str(document['nome']), str(document['quantidade']), str(document['valor']), str(document['_id']))
+        if p.id == str(id):            
+            break
+    
+    print('aki..........................................................01')
+    collection.delete_one({ "nome": p.nome })
+    print('aki..........................................................02')
 
-    return render_template('novo.html', titulo='Produto', produtos=lista) 
+    lista = []
 
+    documents = collection.find()
+    
+    for document in documents:
+        p = Produto(str(document['nome']), str(document['quantidade']), str(document['valor']), str(document['_id']))
+        
+        lista.append(p)
 
+    return render_template('lista.html', titulo='Produtos', produtos=lista)
+
+#------------------------------------------------------------------------------------------------------------------
 
 
 @app.route('/limpar')
 def limpar():
-
-    print('aki01...')
+    
 
     return render_template('lista.html', titulo='produtos', produtos=lista) 
 
+#-------------------------------------------------------------------------------------------------------------
 
+
+@app.route('/home')
+def home():
+    
+    return render_template('home.html', titulo='Seja Bem Vindo') 
+
+#----------------------------------------------------------------------------
 
 app.run(debug=True)
