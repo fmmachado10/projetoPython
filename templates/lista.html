@@ -18,14 +18,14 @@
                             <td>{{ produto.quantidade }}</td>
                             <td>{{ produto.valor }}</td>
                             <td>{{ produto.id }}</td>
-                            <td><a href = "{{ url_for('editar', id=produto.id) }}">Alterar</a></td>
-                            <td><a href = "{{ url_for('deletar', id=produto.id) }}">Deletar</a></td>
+                            <td><a href = "{{ url_for('editar', id=produto.id) }}" class="glyphicon glyphicon-edit" > Alterar</a></td>
+                            <td><a href = "{{ url_for('deletar', id=produto.id) }}" class="glyphicon glyphicon-remove" > Deletar</a></td>
 
                         </tr>
         {% endfor %}
         </tbody>
     </table>
     <br>
-    <button type="submit" class="btn btn-info" onclick="window.location='/novo';">Cadastrar Novo Produto</button>
+    <!-- <button type="submit" class="btn btn-info" onclick="window.location='/novo';">Cadastrar Novo Produto</button> -->
 
 {% endblock %}

@@ -9,7 +9,6 @@ collection = db['produto']
 
 app = Flask(__name__)
 
-
 class Produto:
     def __init__(self, nome, quantidade, valor, id):
         self.id = id
@@ -22,25 +21,7 @@ class Produto:
 #produto2 = Produto('Produto Inicial 02', '10', '20,00', 0)
 lista = []
 
-
-@app.route('/')
-def index():    
-
-    lista = []
-
-    documents = collection.find()
-    
-    for document in documents:
-
-        p = Produto(str(document['nome']), str(document['quantidade']), str(document['valor']), str(document['_id']))
-        
-        lista.append(p)            
-    
-    return render_template('lista.html', titulo='Produtos', produtos=lista)
-
-@app.route('/novo')
-def novo():
-
+def getProdutos():
     lista = []
 
     documents = collection.find()
@@ -50,18 +31,30 @@ def novo():
         
         lista.append(p)
 
-    return render_template('novo.html', titulo='Cadastrar Produto', produtos=lista)
+    return lista
+
+
+@app.route('/')
+def index():    
+
+    return render_template('lista.html', titulo='Alterar/Deletar Produtos', produtos=getProdutos())
+
+
+@app.route('/novo')
+def novo():
+
+    return render_template('novo.html', titulo='Cadastrar Produto', produtos=getProdutos())
 
 
 @app.route('/criar', methods=['POST',])
 def criar():
     
-    if request.form['acaoLimpar'] == 'acaoLimpar':        
+    if request.form['submit_button'] == 'acaoLimpar':        
         nome = ''
         quantidade = ''
         valor = ''
-        return render_template('novo.html', titulo='Cadastrar Produto')        
-    
+        return render_template('novo.html', titulo='Cadastrar Produto')  
+
     nome = request. form['nome']
     quantidade = request. form['quantidade']
     valor = request. form['valor']
@@ -70,16 +63,7 @@ def criar():
 
     collection.insert_one(prod)
 
-    lista = []
-
-    documents = collection.find()
-    
-    for document in documents:
-        p = Produto(str(document['nome']), str(document['quantidade']), str(document['valor']), str(document['_id']))
-        
-        lista.append(p)
-
-    return render_template('novo.html', titulo='Cadastrar Produto', produtos=lista)
+    return render_template('novo.html', titulo='Cadastrar Produto', produtos=getProdutos())
 
 #------------------------EDITAR-----------------------------------
 @app.route('/editar/<id>')
@@ -101,14 +85,12 @@ def editar(id):
 
 @app.route('/atualizar', methods=['POST',])
 def atualizar():  
-    print('AKIIIIII...........................................00')
+    
     nome = request.form['nome']
     quantidade = request.form['quantidade']
     valor = request.form['valor']
-    print('AKIIIIII...........................................01')
+    
     p = Produto(nome, quantidade, valor, id=request.form['id'])
-
-    print('AKIIIIII...........................................02')
 
     collection.update_one({ "_id": p.id}, {"name": p.nome}, {"quantidade": p.quantidade}, {"valor":p.valor})
 
@@ -121,39 +103,24 @@ def atualizar():
 def deletar(id):
 
     documents = collection.find()
-    print('aki..........................................................00')
-
+    
     for document in documents:
         p = Produto(str(document['nome']), str(document['quantidade']), str(document['valor']), str(document['_id']))
         if p.id == str(id):            
             break
     
-    print('aki..........................................................01')
     collection.delete_one({ "nome": p.nome })
-    print('aki..........................................................02')
 
-    lista = []
-
-    documents = collection.find()
-    
-    for document in documents:
-        p = Produto(str(document['nome']), str(document['quantidade']), str(document['valor']), str(document['_id']))
-        
-        lista.append(p)
-
-    return render_template('lista.html', titulo='Alterar/Deletar Produtos', produtos=lista)
+    return render_template('lista.html', titulo='Alterar/Deletar Produtos', produtos=getProdutos())
 
 #------------------------------------------------------------------------------------------------------------------
 
 @app.route('/limpar', methods=['POST',])
 def limpar():
     
-    print('Limpando........................................................')
-
     return render_template('lista.html', titulo='Produtos', produtos=lista) 
 
 #-------------------------------------------------------------------------------------------------------------
-
 
 @app.route('/home')
 def home():
