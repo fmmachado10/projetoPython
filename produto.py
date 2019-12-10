@@ -55,6 +55,13 @@ def novo():
 
 @app.route('/criar', methods=['POST',])
 def criar():
+    
+    if request.form['acaoLimpar'] == 'acaoLimpar':        
+        nome = ''
+        quantidade = ''
+        valor = ''
+        return render_template('novo.html', titulo='Cadastrar Produto')        
+    
     nome = request. form['nome']
     quantidade = request. form['quantidade']
     valor = request. form['valor']
@@ -134,16 +141,16 @@ def deletar(id):
         
         lista.append(p)
 
-    return render_template('lista.html', titulo='Produtos', produtos=lista)
+    return render_template('lista.html', titulo='Alterar/Deletar Produtos', produtos=lista)
 
 #------------------------------------------------------------------------------------------------------------------
 
-
-@app.route('/limpar')
+@app.route('/limpar', methods=['POST',])
 def limpar():
     
+    print('Limpando........................................................')
 
-    return render_template('lista.html', titulo='produtos', produtos=lista) 
+    return render_template('lista.html', titulo='Produtos', produtos=lista) 
 
 #-------------------------------------------------------------------------------------------------------------
 
