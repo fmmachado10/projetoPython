@@ -1,5 +1,6 @@
 from pymongo import MongoClient
 from flask import Flask, render_template, request, redirect, flash, url_for
+from bson.objectid import ObjectId
 
 client = MongoClient('mongodb+srv://fabricio:admin123@cluster0-iehjg.mongodb.net/test?retryWrites=true&w=majority')
 
@@ -27,10 +28,10 @@ def getProdutos():
     documents = collection.find()
     
     for document in documents:
-        p = Produto(str(document['nome']), str(document['quantidade']), str(document['valor']), str(document['_id']))
+        p = Produto(str(document['nome']), str(document['quantidade']), str(document['valor']), ObjectId(document['_id']))
         
         lista.append(p)
-
+    
     return lista
 
 
@@ -69,34 +70,34 @@ def criar():
 @app.route('/editar/<id>')
 def editar(id):
 
-    #produto: Produto = collection.find_one(id)
-
-    #gambiarra, pois não consegui buscar por id
-    documents = collection.find()
+    myquery = {"_id": ObjectId(id) }
+    produto = collection.find( myquery )
     
-    for document in documents:
-        p = Produto(str(document['nome']), str(document['quantidade']), str(document['valor']), str(document['_id']))
-        if p.id == str(id):
-            produto = p
-            break
-
-    return render_template('editar.html', titulo='Editar Produto', produto=produto )
+    for x in produto:      
+        p = Produto(str(x['nome']), str(x['quantidade']), str(x['valor']), x['_id'] )
+    
+    return render_template('editar.html', titulo='Editar Produto', produto=p )
 
 
 @app.route('/atualizar', methods=['POST',])
-def atualizar():  
-    
-    nome = request.form['nome']
+def atualizar():     
+    nome = request.form['nome']   
     quantidade = request.form['quantidade']
     valor = request.form['valor']
+    id = request.form['id']
+
+    collection.update_one(
+        {"_id": ObjectId(id)},
+        {
+            "$set": {
+                "nome": nome,
+                "quantidade": quantidade,
+                "valor": valor
+            }
+        }
+    )
     
-    p = Produto(nome, quantidade, valor, id=request.form['id'])
-
-    collection.update_one({ "_id": p.id}, {"name": p.nome}, {"quantidade": p.quantidade}, {"valor":p.valor})
-
-    pass
-
-    return redirect(url_for('index'))
+    return render_template('lista.html', titulo='Alterar/Deletar Produtos', produtos=getProdutos())
 
 #---------------------------------------------
 @app.route('/deletar/<id>')
